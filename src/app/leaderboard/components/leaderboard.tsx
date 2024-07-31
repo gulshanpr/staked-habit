@@ -394,7 +394,7 @@ export const columns: ColumnDef<Payment>[] = [
       return (
         <Button
           variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc" ? "desc" : "asc")}
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Points
           <CaretSortIcon className="ml-2 h-4 w-4" />

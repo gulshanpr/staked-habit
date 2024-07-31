@@ -3,11 +3,10 @@ import React from 'react'
 import GitHubRepoGraph from './graph';
 import GitHubCommitHistoryGraph from './graph1'
 
-function HomeProfile({data}: {data: any}) {
+function HomeProfile() {
   return (
     <div>
-    
-    <div className="mx-10 my-5 flex items-end justify-end">
+      <div className="mx-10 my-5 flex items-end justify-end">
         <nav className="flex items-end flex space-x-4">
           <a href="/home" className="text-black">
             Home
@@ -28,7 +27,6 @@ function HomeProfile({data}: {data: any}) {
         <GitHubCommitHistoryGraph/>
       </div>
     </div>
-    
   )
 }
 

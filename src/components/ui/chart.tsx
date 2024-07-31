@@ -78,10 +78,10 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 
   return (
     <style
-      dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES).map(
-          ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
+  dangerouslySetInnerHTML={{
+    __html: Object.entries(THEMES).map(
+      ([theme, prefix]) => `
+        ${prefix} [data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
     const color =
