@@ -16,7 +16,7 @@ const walletConnetButtonProps = {
 }
 
 const textRevealProps = {
-  text: "Habit Tracker on Chain with the staking functionailty",
+  text: "Habit Tracker on Chain with the staking functionailty with Fuse",
 }
 
 const shinyTextProps = {
