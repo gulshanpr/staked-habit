@@ -31,11 +31,11 @@ contract Staking {
 
     StakingDetail[] public stakingDetails;
 
-    function stack(string calldata _title, uint _amount, uint _endDate, uint _locsPD, uint _commitsPD) public payable{
-        require(_amount / _endDate == 20, "send exactly 20 tokens per day");
-        require(_endDate > 21, "create atleast 21 days of habit");
-        require(_commitsPD > 1, "atleast 1 commit per day");
-        require(_locsPD > 10, "10 lines of code per day");
+    function stack(string calldata _title, uint _amount, uint _endDate, uint _locsPD, uint _commitsPD) public payable {
+        require(_amount / _endDate >= 20, "send exactly 20 tokens per day");
+        require(_endDate >= 21, "create atleast 21 days of habit");
+        require(_commitsPD >= 1, "atleast 1 commit per day");
+        require(_locsPD >= 10, "10 lines of code per day");
 
         uint arrayIndexCount;
 
@@ -61,5 +61,10 @@ contract Staking {
     // }
 
 
-    function isCompleted()public view {}
+    function isCompleted(uint _habitIndex)public view returns(bool){
+        StakingDetail memory stakingDetail = stakingDetails[_habitIndex];
+        uint endTimeStamp = stakingDetail.startDate + (stakingDetail.endDate * 1 days);
+
+        return block.timestamp >= endTimeStamp;
+    }
 }
