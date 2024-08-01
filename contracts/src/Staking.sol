@@ -13,6 +13,8 @@ contract Staking {
     }
 
     event HabitCreated(uint index, address staker, uint amount);
+    event Received(address sender, uint amount, uint time);
+    event Fallback(address sender, uint amount, uint time,  bytes data);
 
     modifier onlyOwner() {
         require(owner == msg.sender, "only owner can call this");
@@ -29,7 +31,15 @@ contract Staking {
         uint commitsPD;
     }
 
+    struct TokenTransfer {
+        address sender;
+        uint amount;
+        uint time;
+    } 
+    
     StakingDetail[] public stakingDetails;
+    // TokenTransfer[] public tokenTransfers;
+    mapping (address => TokenTransfer[]) public tokenTransfers;
 
     function stack(string calldata _title, uint _amount, uint _endDate, uint _locsPD, uint _commitsPD) public payable {
         require(_amount / _endDate >= 20, "send exactly 20 tokens per day");
@@ -57,7 +67,9 @@ contract Staking {
  
     // function unstack(uint _arrayIndex) external onlyOwner {
 
-    //     require(condition);
+    //     // this will be use to withdraw tokens
+    //     (bool callSuccess, ) = payable(msg.sender).call{value: address(this).balance}("");
+    //     require(callSuccess, "Call Failed");
     // }
 
 
@@ -66,5 +78,36 @@ contract Staking {
         uint endTimeStamp = stakingDetail.startDate + (stakingDetail.endDate * 1 days);
 
         return block.timestamp >= endTimeStamp;
+    }
+
+    receive() external payable {
+        
+        TokenTransfer memory newTransfer = TokenTransfer({
+            sender: msg.sender,
+            amount: msg.value,
+            time: block.timestamp
+        });
+
+        tokenTransfers[msg.sender].push(newTransfer);
+
+        emit Received(msg.sender, msg.value, block.timestamp);
+    }
+    
+    fallback() external payable {
+        TokenTransfer memory newTransfer = TokenTransfer({
+            sender: msg.sender,
+            amount: msg.value,
+            time: block.timestamp
+        });
+
+        tokenTransfers[msg.sender].push(newTransfer);
+        
+
+        emit Fallback(msg.sender, msg.value, block.timestamp, msg.data);
+    }
+
+    // test
+    function contractBalance() public view returns(uint) {
+        return address(this).balance;
     }
 }
