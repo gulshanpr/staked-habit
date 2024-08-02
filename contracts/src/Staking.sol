@@ -11,6 +11,7 @@ contract Staking {
         uint endDate;
         uint locsPD;
         uint commitsPD;
+        bool isHabitCompleted;
     }
 
     struct TokenTransfer {
@@ -42,8 +43,9 @@ contract Staking {
     }
 
 
-    function stack(string calldata _title, uint _amount, uint _endDate, uint _locsPD, uint _commitsPD) public payable {
-        require(_amount / _endDate >= 20, "send exactly 20 tokens per day");
+    function stack(string calldata _title, uint _amount, uint _endDate, uint _locsPD, uint _commitsPD,  uint _index, uint _time) public payable {
+        require(isTokenSentForAHabit(_amount, _index, _time), "Error with stakig");
+        require(_amount / _endDate >= 2, "send exactly 2 tokens per day");
         require(_endDate >= 21, "create atleast 21 days of habit");
         require(_commitsPD >= 1, "atleast 1 commit per day");
         require(_locsPD >= 10, "10 lines of code per day");
@@ -53,11 +55,12 @@ contract Staking {
         stakingDetails.push(StakingDetail({
             title: _title,
             staker: msg.sender,
-            amount: msg.value,
+            amount: _amount,
             startDate: block.timestamp,
             endDate: _endDate,
             locsPD: _locsPD,
-            commitsPD: _commitsPD
+            commitsPD: _commitsPD,
+            isHabitCompleted: false
         }));
 
         arrayIndexCount += 1;
@@ -65,11 +68,40 @@ contract Staking {
         emit HabitCreated(arrayIndexCount, msg.sender, _amount);
     }
 
-    function isCompleted(uint _habitIndex) public view returns (bool) {
+    function unstack(uint _habitIndex, uint _amount) external onlyOwner {
+        // _arrayIndex will come from database
+
+        // require(condition);
+        // make isHabitCompleted == true after withdrawal
+        // this will be use to withdraw tokens
+        require(isCompletedForHabit(_habitIndex), "Habit is not completed yet");
+        StakingDetail memory getStakingDetails = stakingDetails[_habitIndex];
+        require(_amount == getStakingDetails.amount, "requested amount is not same as habit's staked amount");
+        require(_amount <= address(this).balance, "Insufficient balance");
+
+
+
+        (bool callSuccess, ) = payable(msg.sender).call{value: _amount}("");
+        require(callSuccess, "Call Failed");
+    }
+
+    function isCompletedForHabit(uint _habitIndex) public view returns (bool) {
         StakingDetail memory stakingDetail = stakingDetails[_habitIndex];
         uint endTimeStamp = stakingDetail.startDate + (stakingDetail.endDate * 1 days);
 
         return block.timestamp >= endTimeStamp;
+    }
+
+    function isTokenSentForAHabit(uint _amount, uint _index, uint _time) public view returns(bool) {
+        // this will be invoked through db, do not call through person
+        TokenTransfer memory getDetails = tokenTransfers[msg.sender][_index];
+
+        require(msg.sender == getDetails.sender, "call from the account you have staked");
+        require(_amount == getDetails.amount, "staked amount is not same");
+        require(_time == getDetails.time, "timestamp is not matching");
+
+        return true;
+
     }
 
 
