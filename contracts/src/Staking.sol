@@ -3,24 +3,6 @@ pragma solidity ^0.8.20;
 
 contract Staking {
 
-    // every time someone create habit a contract got deployed for that habit
-    // its cheap to deploy contract on chain like fuse
-
-    address owner;
-
-    constructor (){
-        owner = msg.sender;
-    }
-
-    event HabitCreated(uint index, address staker, uint amount);
-    event Received(address sender, uint amount, uint time);
-    event Fallback(address sender, uint amount, uint time,  bytes data);
-
-    modifier onlyOwner() {
-        require(owner == msg.sender, "only owner can call this");
-        _;
-    }
-
     struct StakingDetail {
         string title;
         address staker;
@@ -35,11 +17,30 @@ contract Staking {
         address sender;
         uint amount;
         uint time;
-    } 
-    
+    }
+
+
+    address owner;
+    uint private index;
     StakingDetail[] public stakingDetails;
-    // TokenTransfer[] public tokenTransfers;
     mapping (address => TokenTransfer[]) public tokenTransfers;
+
+
+    event HabitCreated(uint index, address staker, uint amount);
+    event Received(address sender, uint amount, uint _index, uint time);
+    event Fallback(address sender, uint amount, uint time, uint _index, bytes data);
+
+
+    modifier onlyOwner() {
+        require(owner == msg.sender, "only owner can call this");
+        _;
+    }
+
+
+    constructor() {
+        owner = msg.sender;
+    }
+
 
     function stack(string calldata _title, uint _amount, uint _endDate, uint _locsPD, uint _commitsPD) public payable {
         require(_amount / _endDate >= 20, "send exactly 20 tokens per day");
@@ -61,53 +62,52 @@ contract Staking {
 
         arrayIndexCount += 1;
 
-        // at the very end
         emit HabitCreated(arrayIndexCount, msg.sender, _amount);
     }
- 
-    // function unstack(uint _arrayIndex) external onlyOwner {
 
-    //     // this will be use to withdraw tokens
-    //     (bool callSuccess, ) = payable(msg.sender).call{value: address(this).balance}("");
-    //     require(callSuccess, "Call Failed");
-    // }
-
-
-    function isCompleted(uint _habitIndex)public view returns(bool){
+    function isCompleted(uint _habitIndex) public view returns (bool) {
         StakingDetail memory stakingDetail = stakingDetails[_habitIndex];
         uint endTimeStamp = stakingDetail.startDate + (stakingDetail.endDate * 1 days);
 
         return block.timestamp >= endTimeStamp;
     }
 
+
     receive() external payable {
-        
+        uint time = block.timestamp;
+
         TokenTransfer memory newTransfer = TokenTransfer({
             sender: msg.sender,
             amount: msg.value,
-            time: block.timestamp
+            time: time
         });
 
         tokenTransfers[msg.sender].push(newTransfer);
 
-        emit Received(msg.sender, msg.value, block.timestamp);
+        index += 1;
+
+        emit Received(msg.sender, msg.value, index - 1, time);
     }
-    
+
+
     fallback() external payable {
+        uint time = block.timestamp;
+
         TokenTransfer memory newTransfer = TokenTransfer({
             sender: msg.sender,
             amount: msg.value,
-            time: block.timestamp
+            time: time
         });
 
         tokenTransfers[msg.sender].push(newTransfer);
-        
 
-        emit Fallback(msg.sender, msg.value, block.timestamp, msg.data);
+        index += 1;
+
+        emit Fallback(msg.sender, msg.value, time, index - 1, msg.data);
     }
 
-    // test
-    function contractBalance() public view returns(uint) {
+
+    function contractBalance() public view returns (uint) {
         return address(this).balance;
     }
 }
