@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import VelocityScroll from './../components/magicui/scroll-based-velocity';
 import AnimatedShinyText from './../components/magicui/animated-shiny-text';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useToast, toast } from "@/components/ui/use-toast";
-
+import { useToast } from "@/components/ui/use-toast";
 
 const walletConnetButtonProps = {
   buttonColor: "white", 
@@ -17,7 +16,7 @@ const walletConnetButtonProps = {
 }
 
 const textRevealProps = {
-  text: "Habit Tracker on Chain with the staking functionailty with Fuse",
+  text: "Habit Tracker on Chain with the staking functionality with Fuse",
 }
 
 const shinyTextProps = {
@@ -26,58 +25,73 @@ const shinyTextProps = {
 }
 
 export default function Home() {
+  const [connectedToCorrectChain, setConnectedToCorrectChain] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
 
-  const handleGoToApp = async (route: string) => {
-    router.push(route)
+  const handleGoToApp = () => {
+    router.push('/home');
   }
 
   const handleErrToast = (errMsg: string) => {
     toast({
       variant: "destructive",
       description: errMsg,
-    })
+    });
   }
 
-  const handleSucAndToHome = (msg: string) => {
+  const handleSucToast = (msg: string) => {
     toast({
       description: msg,
-    })
+    });
+  }
 
-    router.push('/home');
+  const checkConnectionAndRedirect = async (expectedChainId: string) => {
+    if (typeof window.ethereum !== 'undefined') {
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        if (accounts.length > 0) {
+          const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+          if (chainId === expectedChainId) {
+            setConnectedToCorrectChain(true);
+            handleSucToast("Signed in Go to app");
+          } else {
+            handleErrToast("Please switch to the correct chain");
+          }
+        }
+      } catch (error) {
+        handleErrToast('Error checking MetaMask connection: ' + error);
+      }
+    } else {
+      handleErrToast("MetaMask is not installed");
+    }
   }
 
   useEffect(() => {
-    
-    async function checkConnectionAndRedirect(expectedChainId: string) {
-      if (typeof window.ethereum !== 'undefined') {
-        try {
-          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-
-          if (accounts.length > 0) {
-            const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-
-            if (chainId === expectedChainId) {
-              handleSucAndToHome("Your are connected");
-            } else {
-              handleErrToast("Switch to the correct chain");
-            }
-          }
-        } catch (error) {
-          handleErrToast('Error connecting to MetaMask' + error);
-        }
-      } else {
-        handleErrToast("MetaMask is not installed");
-      }
-    }
-    
     checkConnectionAndRedirect('0x7b');
 
+    // Listen to chain and account changes
+    if (window.ethereum) {
+      window.ethereum.on('chainChanged', () => {
+        checkConnectionAndRedirect('0x7b');
+      });
+      
+      window.ethereum.on('accountsChanged', (accounts) => {
+        if (accounts.length === 0) {
+          setConnectedToCorrectChain(false);
+        } else {
+          checkConnectionAndRedirect('0x7b');
+        }
+      });
+    }
+
+    return () => {
+      if (window.ethereum) {
+        window.ethereum.removeListener('chainChanged', checkConnectionAndRedirect);
+        window.ethereum.removeListener('accountsChanged', checkConnectionAndRedirect);
+      }
+    };
   }, []);
-
-
-  
-
 
   return (
     <div>
@@ -85,9 +99,6 @@ export default function Home() {
         <GridPattern />
       </div>
       <div className="flex justify-end my-8 mx-10">
-
-          {/* className="border border-black text-black text-xl bg-white px-4 py-2 rounded" */}
-          
         <ConnectButton label='Sign in' chainStatus="name" accountStatus="avatar" />
       </div>
       <div className="flex justify-center text-xl">
@@ -99,15 +110,16 @@ export default function Home() {
       <div className="my-24 font-extrabold text-9xl">
         <VelocityScroll {...textRevealProps} />
       </div>
-      <div className="flex justify-center my-8 mx-10">
-        {/* <button
-          className="border border-black text-black text-xl bg-white px-4 py-2 rounded"
-          onClick={handleGoToApp}
-        >
-          Go to app >
-        </button> */}
-      </div>
+      {connectedToCorrectChain && (
+        <div className="flex justify-center my-8 mx-10">
+          <button
+            className="border border-black text-black text-xl bg-white px-4 py-2 rounded"
+            onClick={handleGoToApp}
+          >
+            Go to app >
+          </button>
+        </div>
+      )}
     </div>
   );
-  
 }
