@@ -28,16 +28,16 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Use Next.js navigation hook for routing
   const router = useRouter();
-  const locale = router.locale as Locale;
+  // const locale = router.locale as Locale;
 
   return (
     <html lang="en">
       <body className={inter.className}>
         <WagmiProvider config={config}>
           <QueryClientProvider client={queryClient}>
-            <RainbowKitProvider locale={locale} >
+          {/* <RainbowKitProvider locale={locale} > */}
+          <RainbowKitProvider>
               {children}
             </RainbowKitProvider>
           </QueryClientProvider>
