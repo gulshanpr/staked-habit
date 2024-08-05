@@ -18,39 +18,45 @@ contract Staking {
         address sender;
         uint amount;
         uint time;
+        bool isHabitCreatedForThis;
     }
-
 
     address owner;
     uint private index;
+    uint private arrayIndexCount;
     StakingDetail[] public stakingDetails;
-    mapping (address => TokenTransfer[]) public tokenTransfers;
-
+    mapping(address => TokenTransfer[]) public tokenTransfers;
 
     event HabitCreated(uint index, address staker, uint amount);
     event Received(address sender, uint amount, uint _index, uint time);
     event Fallback(address sender, uint amount, uint time, uint _index, bytes data);
-
+    event UnStack(address withdrawer, uint index, uint amount);
 
     modifier onlyOwner() {
-        require(owner == msg.sender, "only owner can call this");
+        require(owner == msg.sender, "Only owner can call this");
         _;
     }
-
 
     constructor() {
         owner = msg.sender;
     }
 
+    function stack(
+        string calldata _title, 
+        uint _amount, 
+        uint _endDate, 
+        uint _locsPD, 
+        uint _commitsPD,  
+        uint _index, 
+        uint _time
+    ) public {
+        uint amtInETH = _amount / 1 ether;
 
-    function stack(string calldata _title, uint _amount, uint _endDate, uint _locsPD, uint _commitsPD,  uint _index, uint _time) public payable {
-        require(isTokenSentForAHabit(_amount, _index, _time), "Error with stakig");
-        require(_amount / _endDate >= 2, "send exactly 2 tokens per day");
-        require(_endDate >= 21, "create atleast 21 days of habit");
-        require(_commitsPD >= 1, "atleast 1 commit per day");
+        require(isTokenSentForAHabit(msg.sender, _amount, _index, _time), "Error with staking");
+        require(amtInETH / _endDate >= 2, "Send exactly 2 tokens per day");
+        require(_endDate >= 21, "Create at least 21 days of habit");
+        require(_commitsPD >= 1, "At least 1 commit per day");
         require(_locsPD >= 10, "10 lines of code per day");
-
-        uint arrayIndexCount;
 
         stakingDetails.push(StakingDetail({
             title: _title,
@@ -65,45 +71,48 @@ contract Staking {
 
         arrayIndexCount += 1;
 
-        emit HabitCreated(arrayIndexCount, msg.sender, _amount);
+        TokenTransfer storage getDetails = tokenTransfers[msg.sender][_index];
+        getDetails.isHabitCreatedForThis = true;
+
+        emit HabitCreated(arrayIndexCount - 1, msg.sender, _amount);
     }
 
-    function unstack(uint _habitIndex, uint _amount) external onlyOwner {
-        // _arrayIndex will come from database
-
-        // require(condition);
-        // make isHabitCompleted == true after withdrawal
-        // this will be use to withdraw tokens
-        require(isCompletedForHabit(_habitIndex), "Habit is not completed yet");
+    function unstack(uint _habitIndex, uint _amount) external onlyOwner returns (bool) {
+        require(isHabitCompleted(_habitIndex), "Habit is not completed yet");
         StakingDetail memory getStakingDetails = stakingDetails[_habitIndex];
-        require(_amount == getStakingDetails.amount, "requested amount is not same as habit's staked amount");
+        require(_amount == getStakingDetails.amount, "Requested amount is not the same as habit's staked amount");
         require(_amount <= address(this).balance, "Insufficient balance");
 
-
-
         (bool callSuccess, ) = payable(msg.sender).call{value: _amount}("");
-        require(callSuccess, "Call Failed");
+        require(callSuccess, "Call failed");
+
+        getStakingDetails.isHabitCompleted = true;
+
+        emit UnStack(msg.sender, _habitIndex, _amount);
+        return true;
     }
 
-    function isCompletedForHabit(uint _habitIndex) public view returns (bool) {
+    function isHabitCompleted(uint _habitIndex) public view returns (bool) {
         StakingDetail memory stakingDetail = stakingDetails[_habitIndex];
-        uint endTimeStamp = stakingDetail.startDate + (stakingDetail.endDate * 1 days);
-
+        uint256 endTimeStamp = stakingDetail.startDate + (stakingDetail.endDate * 1 days);
         return block.timestamp >= endTimeStamp;
     }
 
-    function isTokenSentForAHabit(uint _amount, uint _index, uint _time) public view returns(bool) {
-        // this will be invoked through db, do not call through person
-        TokenTransfer memory getDetails = tokenTransfers[msg.sender][_index];
+    function isTokenSentForAHabit(
+        address _staker, 
+        uint _amount, 
+        uint _index, 
+        uint _time
+    ) public view returns (bool) {
+        TokenTransfer memory getDetails = tokenTransfers[_staker][_index];
 
-        require(msg.sender == getDetails.sender, "call from the account you have staked");
-        require(_amount == getDetails.amount, "staked amount is not same");
-        require(_time == getDetails.time, "timestamp is not matching");
+        require(_staker == getDetails.sender, "Call from the account you have staked");
+        require(_amount == getDetails.amount, "Staked amount is not the same");
+        require(_time == getDetails.time, "Timestamp is not matching");
+        require(!getDetails.isHabitCreatedForThis, "Habit created for this already");
 
         return true;
-
     }
-
 
     receive() external payable {
         uint time = block.timestamp;
@@ -111,16 +120,15 @@ contract Staking {
         TokenTransfer memory newTransfer = TokenTransfer({
             sender: msg.sender,
             amount: msg.value,
-            time: time
+            time: time,
+            isHabitCreatedForThis: false
         });
 
         tokenTransfers[msg.sender].push(newTransfer);
-
         index += 1;
 
         emit Received(msg.sender, msg.value, index - 1, time);
     }
-
 
     fallback() external payable {
         uint time = block.timestamp;
@@ -128,16 +136,15 @@ contract Staking {
         TokenTransfer memory newTransfer = TokenTransfer({
             sender: msg.sender,
             amount: msg.value,
-            time: time
+            time: time,
+            isHabitCreatedForThis: false
         });
 
         tokenTransfers[msg.sender].push(newTransfer);
-
         index += 1;
 
         emit Fallback(msg.sender, msg.value, time, index - 1, msg.data);
     }
-
 
     function contractBalance() public view returns (uint) {
         return address(this).balance;
