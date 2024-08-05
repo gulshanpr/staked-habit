@@ -76,7 +76,7 @@ export default function Home() {
         checkConnectionAndRedirect('0x7b');
       });
       
-      window.ethereum.on('accountsChanged', (accounts) => {
+      window.ethereum.on('accountsChanged', (accounts: any) => {
         if (accounts.length === 0) {
           setConnectedToCorrectChain(false);
         } else {
@@ -116,7 +116,7 @@ export default function Home() {
             className="border border-black text-black text-xl bg-white px-4 py-2 rounded"
             onClick={handleGoToApp}
           >
-            Go to app >
+            Go to app &gt;
           </button>
         </div>
       )}
