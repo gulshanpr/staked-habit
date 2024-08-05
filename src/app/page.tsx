@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import VelocityScroll from './../components/magicui/scroll-based-velocity';
 import AnimatedShinyText from './../components/magicui/animated-shiny-text';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useToast, toast } from "@/components/ui/use-toast";
 
 
 const walletConnetButtonProps = {
@@ -27,14 +28,53 @@ const shinyTextProps = {
 export default function Home() {
   const router = useRouter();
 
-  const handleGoToApp = async () => {
-    router.push('/home')
+  const handleGoToApp = async (route: string) => {
+    router.push(route)
   }
 
+  const handleErrToast = (errMsg: string) => {
+    toast({
+      variant: "destructive",
+      description: errMsg,
+    })
+  }
+
+  const handleSucAndToHome = (msg: string) => {
+    toast({
+      description: msg,
+    })
+
+    router.push('/home');
+  }
 
   useEffect(() => {
     
+    async function checkConnectionAndRedirect(expectedChainId: string) {
+      if (typeof window.ethereum !== 'undefined') {
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+          if (accounts.length > 0) {
+            const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+
+            if (chainId === expectedChainId) {
+              handleSucAndToHome("Your are connected");
+            } else {
+              handleErrToast("Switch to the correct chain");
+            }
+          }
+        } catch (error) {
+          handleErrToast('Error connecting to MetaMask' + error);
+        }
+      } else {
+        handleErrToast("MetaMask is not installed");
+      }
+    }
+    
+    checkConnectionAndRedirect('0x7b');
+
   }, []);
+
 
   
 
@@ -48,7 +88,7 @@ export default function Home() {
 
           {/* className="border border-black text-black text-xl bg-white px-4 py-2 rounded" */}
           
-        <ConnectButton />
+        <ConnectButton label='Sign in' chainStatus="name" accountStatus="avatar" />
       </div>
       <div className="flex justify-center text-xl">
         <AnimatedShinyText
