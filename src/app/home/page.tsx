@@ -1,281 +1,160 @@
 'use client'
 import * as React from "react"
 import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
 import { useState } from "react";
-import { format } from 'date-fns';
-import { DockDemo } from "./components/dock";
-import DatePickerWithRange from "./components/date"
-import CircularPlusButton from "./components/button";
-import CircularMinusButton from './components/minusButton';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import {
-  Contract,
-  SorobanRpc,
-  TransactionBuilder,
-  Networks,
-  BASE_FEE,
-  nativeToScVal,
-  Address,
-  xdr,
-} from "@stellar/stellar-sdk";
-import { userSignTransaction } from "./Freight";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-
-const DockProp = {
-  children: "Gulshan Kumar Prasad",
-  direction: "bottom"
-}
 
 const CardWithForm: React.FC = () => {
 
-  let rpcUrl = "https://soroban-testnet.stellar.org";
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [stakedAmount, setStakedAmount] = useState('');
+  const [linesOfCode, setLinesOfCode] = useState('');
+  const [commits, setCommits] = useState('');
+  const [days, setDays] = useState('');
+  const [calculatedAmount, setCalculatedAmount] = useState(0);
+  const [error, setError] = useState('');
 
-  let contractAddress =
-    "CDK5UPMDYHBRPG2D25SN7OER7FNVS5ANUMKUVBHDXP74BVVKOKZTTFCJ";
+  const minLinesOfCode = 10;
+  const minCommits = 1;
+  const minDays = 21;
 
-  // coverting Account Address to ScVal form
-  const accountToScVal = (account: any) => new Address(account).toScVal();
+  React.useEffect(() => {
+    const amount = parseInt(days) * 2;
+    setCalculatedAmount(isNaN(amount) ? 0 : amount);
+  }, [days]);
 
-  // coverting String to ScVal form
-  const stringToScValString = (value: any) => {
-    return nativeToScVal(value);
-  };
-
-  const numberToU32 = (value: any) => {
-    return nativeToScVal(value, { type: "u32" });
-  };
-
-  let params = {
-    fee: BASE_FEE,
-    networkPassphrase: Networks.TESTNET,
-  };
-
-  async function contractInt(caller: string, functName: string, values: xdr.ScVal | null) {
-    const provider = new SorobanRpc.Server(rpcUrl, { allowHttp: true });
-    const sourceAccount = await provider.getAccount(caller);
-    const contract = new Contract(contractAddress);
-    let buildTx;
-
-    if (values == null) {
-      buildTx = new TransactionBuilder(sourceAccount, params)
-        .addOperation(contract.call(functName))
-        .setTimeout(30)
-        .build();
-    } else if (Array.isArray(values)) {
-      buildTx = new TransactionBuilder(sourceAccount, params)
-        .addOperation(contract.call(functName, ...values))
-        .setTimeout(30)
-        .build();
-    } else {
-      buildTx = new TransactionBuilder(sourceAccount, params)
-        .addOperation(contract.call(functName, values))
-        .setTimeout(30)
-        .build();
+  const validateInput = (value: any, min: number, errorMessage: string) => {
+    if (value === '' || parseInt(value) < min) {
+      setError(errorMessage);
+      return false;
     }
-
-    let _buildTx = await provider.prepareTransaction(buildTx);
-
-    let prepareTx = _buildTx.toXDR(); // pre-encoding (converting it to XDR format)
-
-    let signedTx = await userSignTransaction(prepareTx, "TESTNET", caller);
-
-    let tx = TransactionBuilder.fromXDR(signedTx, Networks.TESTNET);
-
-    try {
-      let sendTx = await provider.sendTransaction(tx).catch(function (err) {
-        console.error("Catch-1", err);
-        return err;
-      });
-      if (sendTx.errorResult) {
-        throw new Error("Unable to submit transaction");
-      }
-      if (sendTx.status === "PENDING") {
-        let txResponse = await provider.getTransaction(sendTx.hash);
-        //   we will continously checking the transaction status until it gets successfull added to the blockchain ledger or it gets rejected
-        while (txResponse.status === "NOT_FOUND") {
-          txResponse = await provider.getTransaction(sendTx.hash);
-          await new Promise((resolve) => setTimeout(resolve, 100));
-        }
-        if (txResponse.status === "SUCCESS") {
-          let result = txResponse.returnValue;
-          return result;
-        }
-      }
-    } catch (err) {
-      console.log("Catch-2", err);
-      return;
-    }
-  }
-
-  const handleSubmit = () => {
-
-
-    async function expirePass(caller: string, pass_id: any) {
-      let values = numberToU32(pass_id);
-
-      try {
-        let ans = await contractInt(caller, "view_habit", values);
-        console.log(ans);
-      } catch (error) {
-        console.log("failed");
-      }
-    }
-
-    expirePass("GASZAKYGUWA4KNM4CJBWENZUYG4BWSDXWY5Q4XYR5HGLMMBXUYVVBG2K", 1);
-
-
-  }
-
-  const router = useRouter();
-
-  const [incLoc, setIncLoc] = useState(0); // State for lines of code increment
-  const [incCommit, setIncCommit] = useState(0); // State for commits increment
-
-  const handleClickLocIncrement = () => {
-    setIncLoc(incLoc + 10);
+    setError('');
+    return true;
   };
 
-  const handleClickLocDecrement = () => {
-    if (incLoc > 0) {
-      setIncLoc(incLoc - 10);
+  const handleStake = () => {
+    console.log('Staking:', stakedAmount);
+  };
+
+  const handleCreateHabit = () => {
+    console.log('Creating habit with:', { linesOfCode, commits, days });
+  };
+
+
+  const carouselItems = [
+    {
+      title: "Habit Name",
+      component: (
+        <Input
+          id="stakedAmount"
+          type="string"
+          placeholder="21 days of code 💪"
+          value={stakedAmount}
+          onChange={(e) => setStakedAmount(e.target.value)}
+        />
+      )
+    },
+    {
+      title: "Lines of Code",
+      component: (
+        <Input
+          id="linesOfCode"
+          type="number"
+          placeholder={`Minimum ${minLinesOfCode} lines`}
+          value={linesOfCode}
+          onChange={(e) => {
+            setLinesOfCode(e.target.value);
+            validateInput(e.target.value, minLinesOfCode, `Minimum ${minLinesOfCode} lines required`);
+          }}
+        />
+      ),
+      title1: "Number of Commits",
+      component1: (
+        <Input
+          id="commits"
+          type="number"
+          placeholder={`Minimum ${minCommits} commits`}
+          value={commits}
+          onChange={(e) => {
+            setCommits(e.target.value);
+            validateInput(e.target.value, minCommits, `Minimum ${minCommits} commits required`);
+          }}
+        />
+      )
+    },
+    {
+      title: "Number of Days",
+      component: (
+        <Input
+          id="days"
+          type="number"
+          placeholder={`Minimum ${minDays} days`}
+          value={days}
+          onChange={(e) => {
+            setDays(e.target.value);
+            validateInput(e.target.value, minDays, `Minimum ${minDays} days required`);
+          }}
+        />
+      )
+    },
+    {
+      title: "FUSE tokens",
+      component: (
+        <div className="flex flex-col items-center">
+          <div className="text-2xl font-bold mb-4">{calculatedAmount}</div>
+          <div className="flex space-x-2">
+            <Button onClick={handleStake}>Stake</Button>
+            <Button onClick={handleCreateHabit}>Create Habit</Button>
+          </div>
+        </div>
+      )
     }
-  };
-
-  const handleClickCommitIncrement = () => {
-    setIncCommit(incCommit + 1);
-  };
-
-  const handleClickCommitDecrement = () => {
-    if (incCommit > 0) {
-      setIncCommit(incCommit - 1);
-    }
-  };
-
-  const handleMinusClick = () => {
-    console.log("hdafod");
-  }
-
-  const handleClickHome = () => {
-    router.push('/home')
-  }
-
-  const handleClickLeaderBoard = () => {
-    router.push('/leaderboard')
-  }
-
-  const handleClickProfile = () => {
-    router.push('/profile')
-  }
-
+  ];
 
   
-
   return (
     <div>
-    
-    <div className="mx-10 my-5 flex items-end justify-end">
-        <nav className="flex items-end flex space-x-4">
-          <a href="/home" className="text-black" onClick={handleClickHome}>
+      <div className="mx-10 my-5 flex items-end justify-end">
+        <nav className="flex items-end space-x-4">
+          <a href="/home" className="text-black">
             Home
           </a>
-          <a href="/leaderboard" className="text-black" onClick={handleClickLeaderBoard}>
+          <a href="/leaderboard" className="text-black">
             Leaderboard
           </a>
-          <a href="/profile" className="text-black" onClick={handleClickProfile}>
+          <a href="/profile" className="text-black">
             Profile
           </a>
         </nav>
       </div>
+      <div className="mt-36 ml-9 flex flex-col items-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex aspect-square items-center justify-center p-6 flex-col">
+            <h3 className="mb-4 text-lg font-semibold">{carouselItems[activeIndex].title}</h3>
+            {carouselItems[activeIndex].component}
+            <h3 className="mt-3 mb-4 text-lg font-semibold">{carouselItems[activeIndex].title1}</h3>
+            {carouselItems[activeIndex].component1}
+          </CardContent>
+        </Card>
 
-    <div className="my-32 flex flex-col items-center gap-4">
-     
-
-      <div className="grid w-full max-w-sm items-center gap-1.5 border rounded-md">
-        <textarea placeholder="Habit title" />
-      </div>
-      <div className="flex space-x-4">
-      <div className="flex flex-col gap-4">
-      <Card className="w-[350px]">
-        <CardHeader>
-          <CardTitle>Lines of Code</CardTitle>
-          <CardDescription>Set your daily activity goal</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="p-4">
-              <CircularMinusButton onClick={handleClickLocDecrement} />
-            </div>
-            <div>
-              <h1></h1>
-              <h2 className="-mx-1 text-3xl font-bold">{incLoc}</h2>
-              <h2 className="-mx-1 ">loc/day</h2>
-            </div>
-            <div className="p-4">
-              <CircularPlusButton onClick={handleClickLocIncrement} />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="w-[350px]">
-        <CardHeader>
-          <CardTitle>Commits per Day</CardTitle>
-          <CardDescription>Set your daily activity goal</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="p-4">
-              <CircularMinusButton onClick={handleClickCommitDecrement} />
-            </div>
-            <div>
-              <h1></h1>
-              <h2 className="mx-10 text-3xl font-bold">{incCommit}</h2>
-              <h2 className="-mx-1 ">Commits/day</h2>
-            </div>
-            <div className="p-4">
-              <CircularPlusButton onClick={handleClickCommitIncrement} />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      </div>
-      </div>
-
-      <div>
-        <DatePickerWithRange/>
-      </div>
-      <div>
-        <div className="grid w-full max-w-sm items-center gap-1.5">
-          <Input id="picture" type="number" placeholder="Staked amount" />
-        </div>
-        <div>
-          {/* <DockDemo /> */}
-        </div>
-        <div className="my-4 bg-white grid w-full max-w-sm items-center gap-1.5">
-          <Button onClick={handleSubmit}>Create Habit</Button>
+        <div className="mt-4 flex space-x-2">
+          {carouselItems.map((_, index) => (
+            <Button
+              key={index}
+              variant={activeIndex === index ? "default" : "outline"}
+              onClick={() => setActiveIndex(index)}
+            >
+              {index + 1}
+            </Button>
+          ))}
         </div>
       </div>
+
     </div>
-    </div>
-  )
+  );
+  
 }
 
 export default CardWithForm;
