@@ -1,9 +1,50 @@
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgres"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id      Int     @id @default(autoincrement())
+  address String  @unique
+  habits  Habit[]
+}
+
+model Received {
+  id        Int    @id @default(autoincrement())
+  address   String
+  index     Int
+  amount    String
+  timeStamp String
+  habitId   Int    @unique
+  habit     Habit  @relation(fields: [habitId], references: [id])
+}
+
+model Habit {
+  id               Int        @id @default(autoincrement())
+  address          String
+  index            Int        @unique
+  title            String
+  amount           String
+  endDate          Int
+  locs             Int
+  commits          Int
+  streak           Boolean[]
+  isCompleted      Boolean    @default(false)
+  isHabitCompleted Boolean    @default(false)
+  received         Received?
+  unstack          Unstack?
+  user             User       @relation(fields: [address], references: [address])
+}
+
+model Unstack {
+  id        Int     @id @default(autoincrement())
+  index     Int
+  habitId   Int     @unique
+  habit     Habit   @relation(fields: [habitId], references: [id])
+  amount    String
+  withdrawn Boolean @default(false)
 }

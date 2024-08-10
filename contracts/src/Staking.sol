@@ -73,13 +73,14 @@ contract Staking {
 
         TokenTransfer storage getDetails = tokenTransfers[msg.sender][_index];
         getDetails.isHabitCreatedForThis = true;
-
+        
+        // emit title and details
         emit HabitCreated(arrayIndexCount - 1, msg.sender, _amount);
     }
 
     function unstack(uint _habitIndex, uint _amount) external onlyOwner returns (bool) {
         require(isHabitCompleted(_habitIndex), "Habit is not completed yet");
-        StakingDetail memory getStakingDetails = stakingDetails[_habitIndex];
+        StakingDetail storage getStakingDetails = stakingDetails[_habitIndex];
         require(_amount == getStakingDetails.amount, "Requested amount is not the same as habit's staked amount");
         require(_amount <= address(this).balance, "Insufficient balance");
 
