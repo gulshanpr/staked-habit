@@ -5,6 +5,9 @@ import { useState } from "react";
 import './../globals.css';
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 const CardWithForm: React.FC = () => {
 
@@ -42,6 +45,22 @@ const CardWithForm: React.FC = () => {
     console.log('Creating habit with:', { linesOfCode, commits, days });
   };
 
+
+  const handleStakeTest = async () => {
+    const user: any = prisma.received.create({
+      data: {
+        address: "0xsomethingsomethin",
+        index: 0,
+        amount: "23456",
+        timeStamp: "qe456y",
+      }
+    })
+
+    const users = await prisma.user.findMany()
+
+    console.log(users);
+
+  }
 
   const carouselItems = [
     {
@@ -105,7 +124,7 @@ const CardWithForm: React.FC = () => {
         <div className="flex flex-col items-center">
           <div className="text-2xl font-bold mb-4">{calculatedAmount}</div>
           <div className="flex space-x-2">
-            <Button onClick={handleStake}>Stake</Button>
+            <Button onClick={handleStakeTest}>Stake</Button>
             <Button onClick={handleCreateHabit}>Create Habit</Button>
           </div>
         </div>
@@ -113,7 +132,7 @@ const CardWithForm: React.FC = () => {
     }
   ];
 
-  
+
   return (
     <div>
       <div className="mx-10 my-5 flex items-end justify-end">
@@ -154,7 +173,7 @@ const CardWithForm: React.FC = () => {
 
     </div>
   );
-  
+
 }
 
 export default CardWithForm;

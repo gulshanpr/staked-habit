@@ -27,7 +27,7 @@ contract Staking {
     StakingDetail[] public stakingDetails;
     mapping(address => TokenTransfer[]) public tokenTransfers;
 
-    event HabitCreated(uint index, address staker, uint amount);
+    event HabitCreated(string title, uint locPD, uint commitPD, uint endDate, uint index, address staker, uint amount);
     event Received(address sender, uint amount, uint _index, uint time);
     event Fallback(address sender, uint amount, uint time, uint _index, bytes data);
     event UnStack(address withdrawer, uint index, uint amount);
@@ -75,7 +75,7 @@ contract Staking {
         getDetails.isHabitCreatedForThis = true;
         
         // emit title and details
-        emit HabitCreated(arrayIndexCount - 1, msg.sender, _amount);
+        emit HabitCreated(_title, _locsPD, _commitsPD, _endDate, arrayIndexCount - 1, msg.sender, _amount);
     }
 
     function unstack(uint _habitIndex, uint _amount) external onlyOwner returns (bool) {
