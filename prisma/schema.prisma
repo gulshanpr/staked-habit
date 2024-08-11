@@ -3,47 +3,45 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id      Int     @id @default(autoincrement())
-  address String  @unique
-  habits  Habit[]
-}
+// model User {
+//   id         String @id @default(uuid())
+//   address    String @unique
+//   // habitsUUID  String[] uncomment when depolying to postgres
+//   habitsUUID String
+// }
 
 model Received {
-  id        Int    @id @default(autoincrement())
+  id        String @id @default(uuid())
   address   String
   index     Int    @unique
   amount    String
   timeStamp String
-  habit     Habit  @relation(fields: [index], references: [id])
 }
 
-model Habit {
-  id               Int       @id @default(autoincrement())
-  address          String
-  index            Int       @unique
-  title            String
-  amount           String
-  endDate          Int
-  locs             Int
-  commits          Int
-  streak           Boolean[]
-  isCompleted      Boolean   @default(false)
-  isHabitCompleted Boolean   @default(false)
-  received         Received?
-  unstack          Unstack?
-  user             User      @relation(fields: [address], references: [address])
-}
+// model Habit {
+//   id                           String   @id @default(uuid())
+//   address                      String
+//   index                        Int      @unique
+//   title                        String
+//   amount                       String
+//   endDate                      Int
+//   locs                         Int
+//   commits                      Int
+//   streak                       String?
+//   isHabitCompleted             Boolean? @default(false)
+//   isStakeWithdrawnForThisHabit Boolean? @default(false)
+//   unStakeUUID                  String?
+//   receivedUUID                 String
+// }
 
-model Unstack {
-  id        Int     @id @default(autoincrement())
-  index     Int
-  habitId   Int     @unique
-  habit     Habit   @relation(fields: [habitId], references: [id])
-  amount    String
-  withdrawn Boolean @default(false)
-}
+// model Unstack {
+//   id        String  @id @default(uuid())
+//   habitUUID String
+//   index     Int     @unique
+//   amount    String
+//   withdrawn Boolean @default(false)
+// }

@@ -5,9 +5,6 @@ import { useState } from "react";
 import './../globals.css';
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
 
 const CardWithForm: React.FC = () => {
 
@@ -41,25 +38,48 @@ const CardWithForm: React.FC = () => {
     console.log('Staking:', stakedAmount);
   };
 
-  const handleCreateHabit = () => {
-    console.log('Creating habit with:', { linesOfCode, commits, days });
-  };
-
 
   const handleStakeTest = async () => {
-    const user: any = prisma.received.create({
-      data: {
-        address: "0xsomethingsomethin",
-        index: 0,
-        amount: "23456",
-        timeStamp: "qe456y",
+    try {
+      const response = await fetch('/api/details');
+      if (!response.ok) {
+        throw new Error('Network response was not ok from page');
       }
-    })
+      
+      const product = await response.json();
+ 
+      console.log(product);
+    } catch (error) {
+      console.error('Failed to fetch product:', error);
+    }
+  };
+  
+  const handleCreateHabit = async() => {
+    try {
+      const productData = {
+        address: 'New Product',
+        index: 54647,
+        amount: "adsfa",
+        timeStamp: "dfads"
+      };
+  
+      const response = await fetch('/api/details', {
+        method: 'POST',
+        body: JSON.stringify(productData),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      const newProduct = await response.json();
+  
+      if (!response.ok) {
+        throw new Error('Network response was not ok from client', newProduct.message);
+      }
 
-    const users = await prisma.user.findMany()
-
-    console.log(users);
-
+    } catch (error) {
+      console.error('Failed to create product:', error);
+    }
   }
 
   const carouselItems = [
