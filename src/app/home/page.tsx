@@ -52,7 +52,7 @@ const CardWithForm: React.FC = () => {
 
       const recipientAddress = "0x3b8ae4e1Bf9BAe7E811A883Bdec4bE0F79E70242";
 
-      const amountInEther = '0.0001';
+      const amountInEther = '0.01';
       const amountInWei = ethers.parseEther(amountInEther);
 
       console.log("Fetching gas price data...");
