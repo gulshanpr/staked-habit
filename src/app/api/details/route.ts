@@ -22,7 +22,7 @@ export async function POST(request: Request) {
             data: {
                 address,
                 index,
-                amount,
+                amount: amount.toString(),
                 timeStamp
             },
         });
