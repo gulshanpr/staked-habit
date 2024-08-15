@@ -5,7 +5,7 @@
 
 // const prisma = new PrismaClient()
 
-// export async function GET() {
+export async function GET() {
 //     try {
 //         const data = await prisma.received.findMany();
 //         console.log(data)
@@ -14,9 +14,9 @@
 //         console.error('Database query failed:', error);
 //         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 //     }
-// }
+}
 
-// export async function POST(request: Request) {
+export async function POST(request: Request) {
 //     try {
 //         const { address, index, amount, timeStamp } = await request.json();
 
@@ -34,6 +34,4 @@
 //         console.error('Error creating record:', error);
 //         return NextResponse.json({ message: "internal server problem" }, { status: 500 });
 //     }
-// }
-
-
+}
