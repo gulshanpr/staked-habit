@@ -1,37 +1,39 @@
-import { PrismaClient } from '@prisma/client'
-import { NextResponse } from 'next/server';
+// commenting this out as vercel deployment is failing because of type interferece in prisma 
 
-const prisma = new PrismaClient()
+// import { PrismaClient } from '@prisma/client'
+// import { NextResponse } from 'next/server';
 
-export async function GET() {
-    try {
-        const data = await prisma.received.findMany();
-        console.log(data)
-        return NextResponse.json(data);
-    } catch (error) {
-        console.error('Database query failed:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-    }
-}
+// const prisma = new PrismaClient()
 
-export async function POST(request: Request) {
-    try {
-        const { address, index, amount, timeStamp } = await request.json();
+// export async function GET() {
+//     try {
+//         const data = await prisma.received.findMany();
+//         console.log(data)
+//         return NextResponse.json(data);
+//     } catch (error) {
+//         console.error('Database query failed:', error);
+//         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+//     }
+// }
 
-        const test = await prisma.received.create({
-            data: {
-                address,
-                index,
-                amount: amount.toString(),
-                timeStamp
-            },
-        });
+// export async function POST(request: Request) {
+//     try {
+//         const { address, index, amount, timeStamp } = await request.json();
 
-        return NextResponse.json({ message: "post created", data: test }, { status: 200 });
-    } catch (error) {
-        console.error('Error creating record:', error);
-        return NextResponse.json({ message: "internal server problem" }, { status: 500 });
-    }
-}
+//         const test = await prisma.received.create({
+//             data: {
+//                 address,
+//                 index,
+//                 amount: amount.toString(),
+//                 timeStamp
+//             },
+//         });
+
+//         return NextResponse.json({ message: "post created", data: test }, { status: 200 });
+//     } catch (error) {
+//         console.error('Error creating record:', error);
+//         return NextResponse.json({ message: "internal server problem" }, { status: 500 });
+//     }
+// }
 
 
