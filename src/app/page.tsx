@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from 'next/navigation';
 import VelocityScroll from './../components/magicui/scroll-based-velocity';
 import AnimatedShinyText from './../components/magicui/animated-shiny-text';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useToast } from "@/components/ui/use-toast";
+import { useWeb3ModalAccount } from '@web3modal/ethers/react'
 
 const walletConnetButtonProps = {
-  buttonColor: "white", 
+  buttonColor: "white",
   buttonTextColor: "black",
   subscribeStatus: false,
   initialText: "Wallet Connect",
@@ -16,7 +16,7 @@ const walletConnetButtonProps = {
 }
 
 const textRevealProps = {
-  text: "Habit Tracker on Chain with the staking functionality with Fuse",
+  text: "Habit Tracker on Chain with the benefits staking.",
 }
 
 const shinyTextProps = {
@@ -27,6 +27,7 @@ const shinyTextProps = {
 export default function Home() {
   const [connectedToCorrectChain, setConnectedToCorrectChain] = useState(false);
   const router = useRouter();
+  const { address, chainId, isConnected } = useWeb3ModalAccount();
   const { toast } = useToast();
 
   const handleGoToApp = () => {
@@ -46,51 +47,9 @@ export default function Home() {
     });
   }
 
-  const checkConnectionAndRedirect = async (expectedChainId: string) => {
-    if (typeof window.ethereum !== 'undefined') {
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-        if (accounts.length > 0) {
-          const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-          if (chainId === expectedChainId) {
-            setConnectedToCorrectChain(true);
-            handleSucToast("Signed in Go to app");
-          } else {
-            handleErrToast("Please switch to the correct chain");
-          }
-        }
-      } catch (error) {
-        handleErrToast('Error checking MetaMask connection: ' + error);
-      }
-    } else {
-      handleErrToast("MetaMask is not installed");
-    }
-  }
 
   useEffect(() => {
-    checkConnectionAndRedirect('0x7b');
-
-    // Listen to chain and account changes
-    if (window.ethereum) {
-      window.ethereum.on('chainChanged', () => {
-        checkConnectionAndRedirect('0x7b');
-      });
-      
-      window.ethereum.on('accountsChanged', (accounts: any) => {
-        if (accounts.length === 0) {
-          setConnectedToCorrectChain(false);
-        } else {
-          checkConnectionAndRedirect('0x7b');
-        }
-      });
-    }
-
-    return () => {
-      if (window.ethereum) {
-        window.ethereum.removeListener('chainChanged', checkConnectionAndRedirect);
-        window.ethereum.removeListener('accountsChanged', checkConnectionAndRedirect);
-      }
-    };
+   
   }, []);
 
   return (
@@ -99,7 +58,7 @@ export default function Home() {
         <GridPattern />
       </div>
       <div className="flex justify-end my-8 mx-10">
-        <ConnectButton label='Sign in' chainStatus="name" accountStatus="avatar" />
+        <w3m-button />
       </div>
       <div className="flex justify-center text-xl">
         <AnimatedShinyText
@@ -110,7 +69,7 @@ export default function Home() {
       <div className="my-24 font-extrabold text-9xl">
         <VelocityScroll {...textRevealProps} />
       </div>
-      {connectedToCorrectChain && (
+      {isConnected && (
         <div className="flex justify-center my-8 mx-10">
           <button
             className="border border-black text-black text-xl bg-white px-4 py-2 rounded"

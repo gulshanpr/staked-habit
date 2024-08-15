@@ -5,8 +5,8 @@ import { DataTableDemo } from './components/leaderboard'
 function page() {
   return (
     <div>
-    
-    <div className="mx-10 my-5 flex items-end justify-end">
+
+      <div className="mx-10 my-5 flex items-end justify-end">
         <nav className="flex items-end flex space-x-4">
           <a href="/home" className="text-black">
             Home
@@ -20,12 +20,8 @@ function page() {
         </nav>
       </div>
 
-    <div className="-my-7 flex flex-col items-center gap-4"></div>
-      {/* <div className='text-6xl'>
-        <h1>Leaderboard</h1>
-      </div> */}
-      <div> 
-        <DataTableDemo/>
+      <div>
+        <DataTableDemo />
       </div>
     </div>
 

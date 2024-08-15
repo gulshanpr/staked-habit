@@ -39,45 +39,45 @@ const CardWithForm: React.FC = () => {
   };
 
   const handleStake = async () => {
-    try {
-      console.log('Staking:', stakedAmount);
+  //   try {
+  //     console.log('Staking:', stakedAmount);
 
-      const provider = new ethers.BrowserProvider(window.ethereum);
+  //     const provider = new ethers.BrowserProvider(window.ethereum);
 
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
-      const signer = await provider.getSigner();
+  //     await window.ethereum.request({ method: 'eth_requestAccounts' });
+  //     const signer = await provider.getSigner();
 
-      const userAddress = await signer.getAddress();
-      console.log("Connected account:", userAddress);
+  //     const userAddress = await signer.getAddress();
+  //     console.log("Connected account:", userAddress);
 
-      const recipientAddress = "0x3b8ae4e1Bf9BAe7E811A883Bdec4bE0F79E70242";
+  //     const recipientAddress = "0x3b8ae4e1Bf9BAe7E811A883Bdec4bE0F79E70242";
 
-      const amountInEther = '0.01';
-      const amountInWei = ethers.parseEther(amountInEther);
+  //     const amountInEther = '0.01';
+  //     const amountInWei = ethers.parseEther(amountInEther);
 
-      console.log("Fetching gas price data...");
-      const gasPrice = (await provider.getFeeData()).gasPrice; // Fetch the current gas price
+  //     console.log("Fetching gas price data...");
+  //     const gasPrice = (await provider.getFeeData()).gasPrice; // Fetch the current gas price
 
-      console.log("Gas Price:", gasPrice.toString());
+  //     console.log("Gas Price:", gasPrice.toString());
 
-      const tx = {
-        to: recipientAddress,
-        value: amountInWei,
-        gasLimit: 21000, // Standard gas limit for a simple ETH transfer
-        gasPrice: gasPrice, // Legacy transaction using gasPrice
-      };
+  //     const tx = {
+  //       to: recipientAddress,
+  //       value: amountInWei,
+  //       gasLimit: 21000, // Standard gas limit for a simple ETH transfer
+  //       gasPrice: gasPrice, // Legacy transaction using gasPrice
+  //     };
 
-      console.log("Sending transaction...");
-      const transactionResponse = await signer.sendTransaction(tx);
+  //     console.log("Sending transaction...");
+  //     const transactionResponse = await signer.sendTransaction(tx);
 
-      console.log("Transaction sent:", transactionResponse.hash);
+  //     console.log("Transaction sent:", transactionResponse.hash);
 
-      // await transactionResponse.wait();
+  //     // await transactionResponse.wait();
 
-      console.log("Transaction confirmed!");
-    } catch (error) {
-      console.error('Failed to send transaction:', error);
-    }
+  //     console.log("Transaction confirmed!");
+  //   } catch (error) {
+  //     console.error('Failed to send transaction:', error);
+  //   }
 
   };
 
