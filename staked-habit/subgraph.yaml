@@ -1,0 +1,35 @@
+specVersion: 1.0.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: Staking
+    network: arbitrum-sepolia
+    source:
+      address: "0x1c3EA0a967a685b37EeF1673D75a607bfD94aFec"
+      abi: Staking
+      startBlock: 69146830
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Fallback
+        - HabitCreated
+        - Received
+        - UnStack
+      abis:
+        - name: Staking
+          file: ./abis/Staking.json
+      eventHandlers:
+        - event: Fallback(address,uint256,uint256,uint256,bytes)
+          handler: handleFallback
+        - event: HabitCreated(uint256,address,uint256)
+          handler: handleHabitCreated
+        - event: Received(address,uint256,uint256,uint256)
+          handler: handleReceived
+        - event: UnStack(address,uint256,uint256)
+          handler: handleUnStack
+      file: ./src/staking.ts
