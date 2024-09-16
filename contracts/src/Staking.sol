@@ -147,7 +147,17 @@ contract Staking {
         emit Fallback(msg.sender, msg.value, time, index - 1, msg.data);
     }
 
+
+    // getter functions
     function contractBalance() public view returns (uint) {
         return address(this).balance;
+    }
+
+    function getTokenTransferDetails(address _stakersAddress, uint _index) public view returns (TokenTransfer memory) {
+        return tokenTransfers[_stakersAddress][_index];
+    }
+
+    function getStakingDetails(uint _index) public view returns (StakingDetail memory) {
+        return stakingDetails[_index];
     }
 }

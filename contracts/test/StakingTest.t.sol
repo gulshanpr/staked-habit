@@ -9,13 +9,13 @@ contract StakingTest is Test {
     Staking staking;
     address contractAddress;
     address staker = makeAddr("staker");
-    uint256 amountToSend = 50 ether;
+    uint256 amountToSend = 100 ether;
 
     function setUp() public {
         staking = new Staking();
     }
 
-    function testContract() public {
+    function testContractDemo() public {
         console.log("hii gulshan");
         
     }
@@ -37,18 +37,25 @@ contract StakingTest is Test {
     //     assertEq(contractAddress.balance, 1 ether);
     // }
 
+    // Randomly testing everything
     function testSendToken() public {
         vm.deal(staker, amountToSend);
         console.log("fake address that is of staker", staker);
 
         vm.recordLogs();
-        console.log("1", msg.sender);
+        console.log("1 msg.sender", msg.sender);
 
-        (bool success, ) = address(staking).call{value: amountToSend}("");
-        require(success, "Failed to send Ether");
-        console.log("2", msg.sender);
+        // first transaction
+        (bool success0, ) = address(staking).call{value: amountToSend}("");
+        require(success0, "Failed to send Ether");
 
-        staking.stake("test habit", 50e18, 23, 100, 11, 0, 1);
+        // second transaction
+        (bool success1, ) = address(staking).call{value: amountToSend}("");
+        require(success1, "Failed to send Ether");
+
+        console.log("2 msg.sender", msg.sender);
+
+        staking.stake("test habit", 100e18, 36, 100, 10, 0, 1);
 
         Vm.Log[] memory logs = vm.getRecordedLogs();
 
@@ -60,7 +67,7 @@ contract StakingTest is Test {
         (address senderAddr, uint256 amount, uint256 index, uint256 time) = abi.decode(log.data, (address, uint256, uint256, uint256));
 
         console.log("Event Sender: %s", senderAddr);
-        console.log("Event Amount: %s", amount);
+        console.log("Event Amount: %s", amount / 1 ether);
         console.log("Event Index: %s", index);
         console.log("Event Time: %s", time);
 
@@ -68,24 +75,59 @@ contract StakingTest is Test {
         console.log("address of this contract", address(this));
         assertEq(amount, amountToSend);
 
-        Vm.Log memory stakeLog = logs[1];
+        // test for event recording when creating a habit
+        Vm.Log memory stakeLog = logs[2];
 
         (string memory title, uint256 locsPD, uint256 commitsPD, uint256 endDate, uint256 stakeIndex, address sender, uint256 stakeAmount) = abi.decode(stakeLog.data, (string, uint256, uint256, uint256, uint256, address, uint256));
-
         console.log("Event Title: %s", title);
         console.log("Event LocsPD: %s", locsPD);
         console.log("Event CommitsPD: %s", commitsPD);
         console.log("Event EndDate: %s", endDate);
         console.log("Event Index: %s", stakeIndex);
         console.log("Event Sender: %s", sender);
-        console.log("Event Amount: %s", stakeAmount);
+        console.log("Event Amount: %s", stakeAmount / 1 ether);
 
+        // this the tokenTransfers mapping
+        address add = address(this);
+        Staking.TokenTransfer memory logging = staking.getTokenTransferDetails(add, 1);
+        console.log("logging.sender", logging.sender);
+        console.log("logging.amount", logging.amount / 1 ether);
+        console.log("logging.time", logging.time);
+        console.log("logging.isHabitCreatedForThis", logging.isHabitCreatedForThis);
+
+        // this is the stakingDetails array
+        Staking.StakingDetail memory stakingDetail = staking.getStakingDetails(0);
+        console.log("stakingDetail.title", stakingDetail.title);
+        console.log("stakingDetail.staker", stakingDetail.staker);
+        console.log("stakingDetail.amount", stakingDetail.amount / 1 ether);
+        console.log("stakingDetail.startDate", stakingDetail.startDate);
+        console.log("stakingDetail.endDate", stakingDetail.endDate);
+        console.log("stakingDetail.locsPD", stakingDetail.locsPD);
+        console.log("stakingDetail.commitsPD", stakingDetail.commitsPD);
+        console.log("stakingDetail.isHabitCompleted", stakingDetail.isHabitCompleted);
+
+        console.log(staking.isHabitCompleted(0));
+    }
+
+    /*  Sequence by testing, that is how a user will interact with the contract
+        1. user first send the token to the contract
+        2. then based on the emmited event, user will create habit, internally it will check if contract
+            has recieved the token or not, and check certain conditions.
+        3. user can also call the isTokenSentForAHabit function to check if the token is sent or not.
+        4. time to time user can call the isHabitCompleted function to check if the habit is completed or not.
+        5. then user can unstake token after the tiime period is over for that habit.
+    */
+    function testContract() public {
 
     }
 
-    function testStake() public {
+    // function testTokenTransfer() public {
+        
+    // }
 
-    }
+    // function testStake() public {
+
+    // }
 
     // function testAddress() public {
     //     console.log(address(this));
