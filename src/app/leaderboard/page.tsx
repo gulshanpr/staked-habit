@@ -7,7 +7,7 @@ function page() {
     <div>
 
       <div className="mx-10 my-5 flex items-end justify-end">
-        <nav className="flex items-end flex space-x-4">
+        <nav className="flex items-end space-x-4">
           <a href="/home" className="text-black">
             Home
           </a>
