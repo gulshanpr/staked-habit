@@ -21,7 +21,7 @@ contract Staking {
         bool isHabitCreatedForThis;
     }
 
-    address owner;
+    address public owner;
     uint private index;
     uint private arrayIndexCount;
     StakingDetail[] public stakingDetails;
@@ -78,14 +78,16 @@ contract Staking {
         emit HabitCreated(_title, _locsPD, _commitsPD, _endDate, arrayIndexCount - 1, msg.sender, _amount);
     }
 
-    function unStake(uint _habitIndex, uint _amount) external onlyOwner returns (bool) {
+    function unStake(uint _habitIndex, uint _amount) public returns (bool) {
         require(isHabitCompleted(_habitIndex), "Habit is not completed yet");
         StakingDetail storage getStakingDetails = stakingDetails[_habitIndex];
         require(_amount == getStakingDetails.amount, "Requested amount is not the same as habit's staked amount");
         require(_amount <= address(this).balance, "Insufficient balance in the contract");
 
-        (bool callSuccess, ) = payable(msg.sender).call{value: _amount}("");
-        require(callSuccess, "Call failed");
+        address reciever= 0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496;
+
+        (bool callSuccess, ) = payable(reciever).call{value: _amount}("");
+        require(callSuccess, "Failed to withdraw");
 
         getStakingDetails.isHabitCompleted = true;
 
@@ -97,6 +99,12 @@ contract Staking {
         StakingDetail memory stakingDetail = stakingDetails[_habitIndex];
         uint256 endTimeStamp = stakingDetail.startDate + (stakingDetail.endDate * 1 days);
         return block.timestamp >= endTimeStamp;
+    }
+
+    function timeLeftForHabitCompletion(uint _habitIndex) public view returns (uint) {
+        StakingDetail memory stakingDetail = stakingDetails[_habitIndex];
+        uint256 endTimeStamp = stakingDetail.startDate + (stakingDetail.endDate * 1 days);
+        return endTimeStamp - block.timestamp;
     }
 
     function isTokenSentForAHabit(
@@ -159,5 +167,9 @@ contract Staking {
 
     function getStakingDetails(uint _index) public view returns (StakingDetail memory) {
         return stakingDetails[_index];
+    }
+
+    function getOwner() public view returns (address) {
+        return owner;
     }
 }

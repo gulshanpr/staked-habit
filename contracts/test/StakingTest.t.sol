@@ -119,6 +119,45 @@ contract StakingTest is Test {
     */
     function testContract() public {
 
+        vm.recordLogs();
+    
+        vm.deal(staker, amountToSend);
+
+        (bool success1, ) = address(staking).call{value: amountToSend}("");
+        require(success1, "Failed to send Ether");
+
+        console.log(staking.contractBalance() / 1 ether);
+
+
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+
+        require(logs.length > 0, "No logs were recorded");
+        console.log("length of the log == event emitted", logs.length);
+
+        Vm.Log memory stakeLog = logs[0];
+
+        (address senderAddr, uint256 amount, uint256 index, uint256 time) = abi.decode(stakeLog.data, (address, uint256, uint256, uint256));
+
+        assertEq(amount, amountToSend);
+        assertEq(senderAddr, address(this));
+        assertEq(index, 0);
+        assertEq(time, 1);
+        assertEq(staking.isTokenSentForAHabit(senderAddr, amount, index, time), true);
+
+        vm.recordLogs();
+
+        staking.stake("testing user flow", amountToSend, 23, 100, 10, index, time);
+
+        Vm.Log[] memory logs1 = vm.getRecordedLogs();
+        
+        Vm.Log memory stakeLog1 = logs1[0];
+
+        (string memory title, uint256 locsPD, uint256 commitsPD, uint256 endDate, uint256 stakeIndex, address sender, uint256 stakeAmount) = abi.decode(stakeLog1.data, (string, uint256, uint256, uint256, uint256, address, uint256));
+
+        console.log(staking.timeLeftForHabitCompletion(0));
+
+
     }
 
     // function testTokenTransfer() public {
@@ -133,6 +172,59 @@ contract StakingTest is Test {
     //     console.log(address(this));
     //     console.log("address of contract", address(staking));
     // }
+
+    function testUnstake() public {
+    vm.recordLogs();
+    
+    // Give the staker some Ether
+    vm.deal(staker, amountToSend);
+
+    // Send Ether to the staking contract
+    (bool success1, ) = address(staking).call{value: amountToSend}("");
+    require(success1, "Failed to send Ether");
+
+    console.log(staking.contractBalance() / 1 ether);
+
+    // Record logs and verify the initial stake was successful
+    Vm.Log[] memory logs = vm.getRecordedLogs();
+    Vm.Log memory stakeLog = logs[0];
+
+    (address senderAddr, uint256 amount, uint256 index, uint256 time) = abi.decode(stakeLog.data, (address, uint256, uint256, uint256));
+    assertEq(amount, amountToSend);
+    assertEq(senderAddr, address(this));
+    assertEq(index, 0);
+    assertEq(time, 1);
+    assertEq(staking.isTokenSentForAHabit(senderAddr, amount, index, time), true);
+
+    vm.recordLogs();
+
+    // Simulate staking details
+    staking.stake("testing", amount, 23, 111, 11, index, time);
+
+    Vm.Log[] memory logs1 = vm.getRecordedLogs();
+    Vm.Log memory stakeLog1 = logs1[0];
+
+    (string memory title, uint256 locsPD, uint256 commitsPD, uint256 endDate, uint256 stakeIndex, address sender, uint256 stakeAmount) = abi.decode(stakeLog1.data, (string, uint256, uint256, uint256, uint256, address, uint256));
+
+    assertEq(title, "testing"); 
+    assertEq(locsPD, 111);
+    assertEq(commitsPD, 11);
+    assertEq(endDate, 23);
+    assertEq(stakeIndex, 0);
+    assertEq(sender, address(this));
+    assertEq(stakeAmount, 100e18);
+    
+    console.log(staking.contractBalance() / 1 ether);
+    console.log(staking.getOwner());
+    console.log(msg.sender);
+    console.log(address(this).balance);
+
+    // Simulate marking the habit as completed before calling unStake
+    // staking.markHabitAsCompleted(0); // Assuming you have a function to mark habit completion
+
+    // Call unStake and verify it works
+    // staking.unStake(0, stakeAmount);
+}
 
 
 }
