@@ -96,7 +96,7 @@ contract StakingTest is Test {
         console.log("logging.isHabitCreatedForThis", logging.isHabitCreatedForThis);
 
         // this is the stakingDetails array
-        Staking.StakingDetail memory stakingDetail = staking.getStakingDetails(0);
+        Staking.StakingDetail memory stakingDetail = staking.getStakingDetail(0);
         console.log("stakingDetail.title", stakingDetail.title);
         console.log("stakingDetail.staker", stakingDetail.staker);
         console.log("stakingDetail.amount", stakingDetail.amount / 1 ether);

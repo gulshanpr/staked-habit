@@ -82,11 +82,10 @@ contract Staking {
         require(isHabitCompleted(_habitIndex), "Habit is not completed yet");
         StakingDetail storage getStakingDetails = stakingDetails[_habitIndex];
         require(_amount == getStakingDetails.amount, "Requested amount is not the same as habit's staked amount");
-        require(_amount <= address(this).balance, "Insufficient balance in the contract");
+        require(msg.sender == getStakingDetails.staker, "Only staker can withdraw");
+        require(_amount < address(this).balance, "Insufficient balance in the contract");
 
-        address reciever= 0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496;
-
-        (bool callSuccess, ) = payable(reciever).call{value: _amount}("");
+        (bool callSuccess, ) = payable(msg.sender).call{value: _amount}("");
         require(callSuccess, "Failed to withdraw");
 
         getStakingDetails.isHabitCompleted = true;
@@ -165,7 +164,7 @@ contract Staking {
         return tokenTransfers[_stakersAddress][_index];
     }
 
-    function getStakingDetails(uint _index) public view returns (StakingDetail memory) {
+    function getStakingDetail(uint _index) public view returns (StakingDetail memory) {
         return stakingDetails[_index];
     }
 
