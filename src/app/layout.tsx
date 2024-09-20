@@ -28,7 +28,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <AppKit>{children}</AppKit>
-        <Toaster />
+        {/* <Toaster /> */}
       </body>
     </html>
   );

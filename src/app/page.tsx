@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import VelocityScroll from './../components/magicui/scroll-based-velocity';
 import AnimatedShinyText from './../components/magicui/animated-shiny-text';
 import { useToast } from "@/components/ui/use-toast";
-import { useWeb3ModalAccount } from '@web3modal/ethers/react'
+import { useAppKitAccount } from '@reown/appkit/react';
 
 const walletConnetButtonProps = {
   buttonColor: "white",
@@ -27,7 +27,7 @@ const shinyTextProps = {
 export default function Home() {
   const [connectedToCorrectChain, setConnectedToCorrectChain] = useState(false);
   const router = useRouter();
-  const { address, chainId, isConnected } = useWeb3ModalAccount();
+  const { isConnected } = useAppKitAccount();
   const { toast } = useToast();
 
   const handleGoToApp = () => {
