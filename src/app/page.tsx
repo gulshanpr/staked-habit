@@ -7,13 +7,6 @@ import AnimatedShinyText from './../components/magicui/animated-shiny-text';
 import { useToast } from "@/components/ui/use-toast";
 import { useAppKitAccount } from '@reown/appkit/react';
 
-const walletConnetButtonProps = {
-  buttonColor: "white",
-  buttonTextColor: "black",
-  subscribeStatus: false,
-  initialText: "Wallet Connect",
-  changeText: "Connected"
-}
 
 const textRevealProps = {
   text: "Habit Tracker on Chain with the benefits staking.",
@@ -56,9 +49,6 @@ export default function Home() {
     <div>
       <div>
         <GridPattern />
-      </div>
-      <div className="flex justify-end my-8 mx-10">
-        <w3m-button />
       </div>
       <div className="flex justify-center text-xl">
         <AnimatedShinyText

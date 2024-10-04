@@ -67,13 +67,3 @@
       @apply bg-background text-foreground;
     }
   }
-
-
-  /* body {
-    background-color: #e5e5f7;
-    opacity: 0;
-    background-image:  linear-gradient(135deg, #212124 25%, transparent 25%), linear-gradient(225deg, #212124 25%, transparent 25%), linear-gradient(45deg, #212124 25%, transparent 25%), linear-gradient(315deg, #212124 25%, #e5e5f7 25%);
-    background-position:  9px 0, 9px 0, 0 0, 0 0;
-    background-size: 9px 9px;
-    background-repeat: repeat;
-  } */

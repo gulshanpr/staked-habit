@@ -1,8 +1,0 @@
-{
-  "arbitrum-sepolia": {
-    "Staking": {
-      "address": "0x1c3EA0a967a685b37EeF1673D75a607bfD94aFec",
-      "startBlock": 69146830
-    }
-  }
-}
